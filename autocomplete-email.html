@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<body>
+<input id="email" name="email" type="email" placeholder="your@email.com" autocomplete="off">
+<script type="text/javascript">
+
+	(function ( $ ) {
+ 
+	    $.fn.AutomCompleteEmailDomain = function( options ) {
+	 
+	        // This is the easiest way to have default options.
+	        var settings = $.extend({
+	            // These are the defaults.
+	            color: "#000000",
+	            hoverColor: "#cdcdcd",
+	            padding: '5px 10px 5px 10px',
+	            borderTop: 0,
+	            borderRight: 1,
+	            borderBottom: 1,
+	            borderLeft: 1,
+	            borderColor: '#000000',
+	            domains: ["yahoo.com", "gmail.com", "google.com", "hotmail.com", "me.com", "aol.com", "mac.com", "live.com", "comcast.com", "googlemail.com", "msn.com", "hotmail.co.uk", "yahoo.co.uk", "facebook.com", "verizon.net", "att.net", "gmz.com", "mail.com"]
+	        }, options );
+	 
+	        // Greenify the collection based on the settings variable.
+	        return this.each(function() {
+		        // Do something to each element here.
+		        var EmailDomainSuggester = {
+	  
+				  	domains: settings.domains,
+				  
+				  	emailInput: $(this),
+				  
+				  	init: function() {
+					    this.addEmailListElements();
+					    this.bindAllEvents();
+					    this.setEmailListElementStyle();
+					},
+				  
+				  	addEmailListElements: function() {
+				    	// Create empty datalist
+				    	this.datalist = $("<div />", {
+				      		class: 'email-list-'+this.makeId(5)
+				    	}).insertAfter(this.emailInput);
+				  	},
+				  
+				  	bindAllEvents: function() {
+				    	this.emailInput.on("keyup click", this.suggestEmail);
+				    	this.emailInput.next().on('click', '.suggest-email', this.onSelectSetEmail);
+				    	this.emailInput.next().click(function(e){ e.stopPropagation(); });
+						$(document).on('click',function(e){ EmailDomainSuggester.emailInput.next().hide(); EmailDomainSuggester.datalist.empty(); });
+				  	},
+
+				  	setEmailListElementStyle: function() {
+
+				  		this.emailInput.next().hide();
+
+				    	var Class = this.emailInput.next().attr('class');
+
+				    	var css  = '.'+Class+' .suggest-email { color: '+settings.color+'; cursor: pointer; padding: '+settings.padding+'; }';
+				    		css += '.'+Class+' .suggest-email:hover { background: '+settings.hoverColor+'; }';
+				    		css += '.'+Class+' { border-top: '+settings.borderTop+'px; border-right: '+settings.borderRight+'px; border-bottom: '+settings.borderBottom+'px; border-left: '+settings.borderLeft+'px; border-style: solid; border-color: '+settings.borderColor+' }';
+
+						    var head = document.head || document.getElementsByTagName('head')[0],
+						       style = document.createElement('style');
+
+						head.appendChild(style);
+
+						style.type = 'text/css';
+						if (style.styleSheet){
+						  // This is required for IE8 and below.
+						  style.styleSheet.cssText = css;
+						} else {
+						  style.appendChild(document.createTextNode(css));
+						}
+
+						var bordersOnBothSides = this.emailInput.next().outerWidth() - this.emailInput.next().innerWidth() ;
+						this.emailInput.next().css('width',( this.emailInput.outerWidth() - bordersOnBothSides )+'px');
+
+				  	},
+				    
+				  	suggestEmail: function(event) {
+				  		
+				  		event.stopPropagation();
+
+				    	var el = $(this),
+				         value = el.val();
+				                    
+					    // email has @
+					    // remove != -1 to open earlier
+					    if (value.indexOf("@") != -1) {
+					      	var name   = value.split("@")[0];
+					      	var domain = value.split("@")[1];
+					      	EmailDomainSuggester.addDatalist(name,domain);
+					    } else {
+					      	// empty list
+					      	el.next().hide();
+					      	EmailDomainSuggester.datalist.empty();
+					    }
+				     
+				  	},
+
+				  	onSelectSetEmail: function(event) {
+				    	var el = $(this),
+				         value = el.text();
+				       	el.parent().prev().val(value);
+				       	el.parent().hide();
+				       	EmailDomainSuggester.datalist.empty();
+				  	},
+				  
+				  	addDatalist: function(name, domain) {
+					    var i, suggestEmail = "";
+					    if( this.domains.length ){
+						    for (i = 0; i < this.domains.length; i++) {
+						    	if( this.domains[i] != domain ){
+							    	if( this.domains[i].startsWith(domain) ){
+								      suggestEmail += "<div class='suggest-email'>" + name + "@" +this.domains[i] +"</div>";
+								    }
+								}
+						    }
+						    // add new ones
+						    if( suggestEmail != '' ){
+						    	this.datalist.html(suggestEmail).show();
+						    }
+						}
+				  	},
+
+				  	makeId: function(length) {
+					    var result           = '';
+					    var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+					    var charactersLength = characters.length;
+					    for ( var i = 0; i < length; i++ ) {
+					      	result += characters.charAt(Math.floor(Math.random() * charactersLength));
+					   	}
+					   return result;
+					}
+				  
+				};
+
+				EmailDomainSuggester.init();
+
+		    });
+	 
+	    };
+
+	    $('#email').AutomCompleteEmailDomain();
+	 
+	}( jQuery ));
+
+</script>
+</body>
+</html>
